@@ -7,8 +7,7 @@ import (
     "os"
     "strings"
     "context"
-    "devbot/utils"
-    
+    "github.com/lsparrish/chatbot-for-study/utils"
     "github.com/sashabaranov/go-openai"
 )
 
