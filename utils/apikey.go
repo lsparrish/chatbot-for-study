@@ -1,31 +1,37 @@
 package utils
 
 import (
+    "bufio"
     "log"
     "os"
     "strings"
-    "bufio"
 )
 
 func GetApiKey() string {
     file, err := os.Open(".env")
-    if err != nil {
-        log.Fatal("Error opening .env file")
-    }
-    defer file.Close()
-
-    variables := make(map[string]string)
-
-    scanner := bufio.NewScanner(file)
-    for scanner.Scan() {
-        line := scanner.Text()
-		pair := strings.Split(line, "=")
-		if len(pair) < 2 {
-    		continue // skip this line
-		}
-		variables[pair[0]] = pair[1]
+    if err == nil {
+        defer file.Close()
+        return getApiKeyFromScanner(bufio.NewScanner(file))
+    } else {
+        log.Print(err)
     }
 
-    apiKey := variables["OPENAI_API_KEY"]
+    log.Print("Enter OpenAI API key: ")
+    apiKey := getApiKeyFromScanner(bufio.NewScanner(os.Stdin))
+    if apiKey != "" {
+        if err := os.WriteFile(".env", []byte("OPENAI_API_KEY="+apiKey), 0600); err != nil {
+            log.Fatal(err)
+        }
+    }
     return apiKey
+    
+}
+
+func getApiKeyFromScanner(scanner *bufio.Scanner) string {
+    for scanner.Scan() {
+        if apiKey := strings.TrimPrefix(scanner.Text(), "OPENAI_API_KEY="); apiKey != scanner.Text() {
+            return apiKey
+        }
+    }
+    return ""
 }
